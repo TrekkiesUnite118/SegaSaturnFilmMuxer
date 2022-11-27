@@ -16,6 +16,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.UIManager;
 
 import sega.film.FILMUtility;
 import sega.film.FILMfile;
@@ -34,6 +35,8 @@ public class FILMMuxer {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
+                    UIManager.setLookAndFeel(
+                            UIManager.getSystemLookAndFeelClassName());
                     FILMMuxer window = new FILMMuxer();
                     window.frame.setVisible(true);
                 } catch (Exception e) {
