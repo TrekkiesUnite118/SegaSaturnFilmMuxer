@@ -29,4 +29,8 @@ Your new file will be in the specified output directory with the naming conventi
 
 # Why use this instead of FFMPEG?
 
-While FFMPEG does technically support Sega FILM files, it does not generate the STAB chunk correctly. While some games may be lenient and still play these files, thay may present issues (Video glitches, Cracks and Pops in audio, other errors, etc.). Other games may instead just flat out refuse to play these files or crash completely. A good example of this is Sakura Wars 2. This tool will instead generate a correct file with a compliant STAB chunk that any game should be able to play.
+While FFMPEG does technically support Sega FILM files, it does not generate the STAB chunk correctly. While some games may be lenient and still play these files, thay may present issues (Video glitches, Cracks and Pops in audio, other errors, etc.). Other games may instead just flat out refuse to play these files or crash completely. A good example of this is Sakura Wars 2. When doing research on various different ADX Cinepak files, this was a game I found that flat out would not play any file I threw at it that used ADX audio that FFMPEG created.
+
+This tool will instead generate a correct file with a compliant STAB chunk that any game should be able to play. To show that it works, here is a test I did taking the Disc 2 intro for Sakura Wars 2, and adding subtitles that I did for the first game and patching it into Disc 1:
+
+https://www.youtube.com/watch?v=hf_0NowZuV8
