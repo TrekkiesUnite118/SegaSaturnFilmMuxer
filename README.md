@@ -20,7 +20,7 @@ The one obvious caveat here is that you need to be able to encode your videos in
 # How to use
 
 1) Encode your new video as you normally would following the Sega Saturn Cinepak Encoding process making sure to adhear to the requirements listed above.
-    * If you want to preserve the original video but replace the audio, encode your a copy of the source video with your new audio swapped in.
+    * If you want to preserve the original video but replace the audio, encode a copy of the source video with your new audio swapped in.
     * If you want to preserve the original audio, encode your modified video with uncompressed PCM audio that matches the specifications of the original source video.
 2) Run the tool and select the source FILM file for your audio, the source FILM file for your video, and the output directory.
 3) Click the "Mux Audio and Video" button.
