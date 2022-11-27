@@ -15,6 +15,8 @@ Currently the tool does have the following requirements for use:
 2) Both files audio streams must have the same specifications (8-bit/16-bit, Mono/Stereo, Sample Rate, etc.). Audio Compression however does not matter.
 3) Being written in Java, a Java Runtime Environment must be installed. It should work with Java 8 or higher.
 
+The one obvious caveat here is that you need to be able to encode your videos in the Saturn format to start. For ADX audio the key caveat is you need a source file that already has ADX audio. This can work if you want to preserve an original FMV's ADX audio, but unfortunately there isn't a way to add new ADX audio yet. I'd like to add this in the future, but I just haven't had the time to look into how this kind of audio was originally broken up into it's STAB chunks.
+
 # How to use
 
 1) Encode your new video as you normally would following the Sega Saturn Cinepak Encoding process making sure to adhear to the requirements listed above.
