@@ -56,7 +56,7 @@ public class FILMMuxer {
      */
     private void initialize() {
         frame = new JFrame();
-        frame.setBounds(100, 100, 491, 250);
+        frame.setBounds(100, 100, 550, 250);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("Sega Saturn FILM Muxer");
         
@@ -77,7 +77,7 @@ public class FILMMuxer {
         
         
         TextField parseAudioInputFileDirField = new TextField();
-        parseAudioInputFileDirField.setBounds(130, 41, 299, 22);
+        parseAudioInputFileDirField.setBounds(157, 41, 343, 22);
         frame.getContentPane().add(parseAudioInputFileDirField);
         
         Button parseAudioInputDirSearchButton = new Button("...");
@@ -93,16 +93,16 @@ public class FILMMuxer {
                 }
             }
         });
-        parseAudioInputDirSearchButton.setBounds(431, 41, 22, 22);
+        parseAudioInputDirSearchButton.setBounds(502, 41, 22, 22);
         frame.getContentPane().add(parseAudioInputDirSearchButton);
         
-        Label inputAudioParseDirLabel = new Label("Audio Source FILM File");
+        Label inputAudioParseDirLabel = new Label("Audio Source FILM / ADX File");
         inputAudioParseDirLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-        inputAudioParseDirLabel.setBounds(10, 41, 125, 22);
+        inputAudioParseDirLabel.setBounds(10, 41, 148, 22);
         frame.getContentPane().add(inputAudioParseDirLabel);
         
         TextField parseVideoInputFileDirField = new TextField();
-        parseVideoInputFileDirField.setBounds(130, 69, 299, 22);
+        parseVideoInputFileDirField.setBounds(157, 69, 343, 22);
         frame.getContentPane().add(parseVideoInputFileDirField);
         
         Button parseVideoInputDirSearchButton = new Button("...");
@@ -118,7 +118,7 @@ public class FILMMuxer {
                 }
             }
         });
-        parseVideoInputDirSearchButton.setBounds(431, 69, 22, 22);
+        parseVideoInputDirSearchButton.setBounds(502, 69, 22, 22);
         frame.getContentPane().add(parseVideoInputDirSearchButton);
         
         Label inputVideoParseDirLabel = new Label("Video Source FILM File");
@@ -137,7 +137,7 @@ public class FILMMuxer {
         frame.getContentPane().add(outputParseDirLabel);
         
         TextField parseOutputFileDirField = new TextField();
-        parseOutputFileDirField.setBounds(130, 97, 299, 22);
+        parseOutputFileDirField.setBounds(157, 97, 343, 22);
         frame.getContentPane().add(parseOutputFileDirField);
         
         Button parseOutputDirSearchButton = new Button("...");
@@ -153,7 +153,7 @@ public class FILMMuxer {
                 }
             }
         });
-        parseOutputDirSearchButton.setBounds(431, 97, 22, 22);
+        parseOutputDirSearchButton.setBounds(502, 97, 22, 22);
         frame.getContentPane().add(parseOutputDirSearchButton);
         
         Button parseButton = new Button("Mux Audio and Video");
@@ -197,7 +197,7 @@ public class FILMMuxer {
             }
         });
         parseButton.setFont(new Font("Arial", Font.PLAIN, 20));
-        parseButton.setBounds(20, 125, 433, 57);
+        parseButton.setBounds(10, 125, 514, 57);
         frame.getContentPane().add(parseButton);
     }
 
