@@ -161,17 +161,32 @@ public class FILMMuxer {
             public void actionPerformed(ActionEvent e) {
                 
                 try {
-                    FILMUtility.parse(parseAudioInputFileDirField.getText(), file1);
-                    FILMUtility.parse(parseVideoInputFileDirField.getText(), file2);
                     
-                    System.out.println("Attempting to ReMux files...");
-                    parseButton.setEnabled(false);
-                    FILMfile newFilm = FILMUtility.swapAudio(file1, file2);
+                    if(!parseAudioInputFileDirField.getText().endsWith(".ADX") && !parseAudioInputFileDirField.getText().endsWith(".adx")) {
                     
-                    File f = new File(parseAudioInputFileDirField.getText());
+                        FILMUtility.parse(parseAudioInputFileDirField.getText(), file1);
+                        FILMUtility.parse(parseVideoInputFileDirField.getText(), file2);
                     
-                    FILMUtility.reconstruct(newFilm, parseOutputFileDirField.getText() + "\\NEW_" + f.getName());
-                    parseButton.setEnabled(true);
+                        System.out.println("Attempting to ReMux files...");
+                        parseButton.setEnabled(false);
+                        FILMfile newFilm = FILMUtility.swapAudio(file1, file2);
+                        
+                        File f = new File(parseAudioInputFileDirField.getText());
+                        
+                        FILMUtility.reconstruct(newFilm, parseOutputFileDirField.getText() + "\\NEW_" + f.getName());
+                        parseButton.setEnabled(true);
+                    } else {
+
+                        FILMUtility.parse(parseVideoInputFileDirField.getText(), file2);
+                        System.out.println("Attempting to ReMux files...");
+                        parseButton.setEnabled(false);
+                        FILMfile newFilm = FILMUtility.swapAudioFromADXFile(parseAudioInputFileDirField.getText(), file2);
+                        
+                        File f = new File(parseVideoInputFileDirField.getText());
+                        
+                        FILMUtility.reconstruct(newFilm, parseOutputFileDirField.getText() + "\\NEW_" + f.getName());
+                        parseButton.setEnabled(true);
+                    }
                     
                    
                 } catch (IOException e1) {

@@ -96,7 +96,42 @@ public class FILMUtility {
         }
     }
     
-    public static FILMfile swapAudio(FILMfile source, FILMfile dest) throws IOException {
+    public static FILMfile swapAudioFromADXFile(String adxFilePath, FILMfile dest) throws IOException {
+        
+        if(dest.getHeader().getCompression() == 2) {
+            File f = new File(adxFilePath);
+            
+            byte[] ADXBytes = Files.readAllBytes(f.toPath());
+                            
+            List<STABEntry> destStabs = dest.getHeader().getStab().getEntries();
+            
+            List<Integer> audioStabs = new ArrayList<>();
+            
+            int adxOffset = 0;
+            List<byte[]> newChunks = new ArrayList<>();
+            for(int i = 0; i < destStabs.size(); i++) {
+                if(isAudioChunk(destStabs.get(i))) {
+                    audioStabs.add(i);
+                    newChunks.add(Arrays.copyOfRange(ADXBytes, adxOffset, adxOffset + destStabs.get(i).getLength()));
+                    
+                    adxOffset += destStabs.get(i).getLength();
+                    
+                } else {
+                    newChunks.add(dest.getChunks().get(i));
+                }
+            }
+            
+            dest.setChunks(newChunks);
+            
+            return dest;
+        } else {
+            //file doesn't use ADX, abort.
+            return dest;
+        }
+        
+    }
+    
+public static FILMfile swapAudio(FILMfile source, FILMfile dest) throws IOException {
         
         List<STABEntry> sourceStabs = source.getHeader().getStab().getEntries();
         
