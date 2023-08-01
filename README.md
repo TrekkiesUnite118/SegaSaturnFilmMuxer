@@ -1,37 +1,70 @@
 # SegaSaturnFilmMuxer
 
-This tool will take the Audio and Video from 2 different source FILM files and remux them to create a new FILM file of the combined streams. This is useful if you need to modify only one aspect of an FMV in a Saturn game such as the following situations:
 
-1) You have a Japanese FMV that you want to replace the Audio with a different langauges dub while preserving the quality of the original Japanese Video encode.
-2) You have a newly encoded FMV but you want to preserve the quality or compression scheme of the original FMV from the game.
+This tool will take the Audio and Video from 2 different sources and remux them to create a new FILM file of the combined streams. This is useful if you need to modify only one aspect of an FMV in a Saturn game such as the following situations:
 
+1. You have a Japanese FMV that you want to replace the Audio with a different langauges dub while preserving the quality of the original Japanese Video encode.
+
+2. You have a newly encoded FMV but you want to preserve the quality or compression scheme of the original FMV from the game.
+   
 The tool is able to support both uncompressed PCM audio as well as ADX compressed audio.
+
 
 # Requirements for use
 
+
 Currently the tool does have the following requirements for use:
+1. If using 2 videos as sources, both files video streams must have the exact same amount of frames and match in resolution and frame rate.
 
-1) Both files video streams must have the exact same amount of frames and match in resolution and frame rate.
-2) Both files audio streams must have the same length and specifications (8-bit/16-bit, Mono/Stereo, Sample Rate, etc.). Audio Compression however does not matter.
-3) Being written in Java, a Java Runtime Environment must be installed. It should work with Java 8 or higher.
+2. Both files audio streams must have the same specifications (8-bit/16-bit, Mono/Stereo, Sample Rate, length, etc.). Audio Compression however does not matter.
 
-## NOTES FOR ADX AUDIO:
+3. Being written in Java, a Java Runtime Environment must be installed. It should work with Java 8 or higher.
 
-Muxing existing ADX audio from a source FILM file with a new video stream from another FILM file is supported and requires the user follow the requirements stated above.
+
+NOTES FOR ADX AUDIO:
+
+Muxing existing ADX audio from a source FILM file with a new video stream from another FILM file is supported and requires he user follow the requirements stated above.
 
 If you are swapping in new ADX audio to mux with an existing Video Stream, you only need to provide the ADX file for the Source Audio file. The one caveat is that the new ADX file must be the exact same specifications (Sample Rate, Stereo/Mono, etc.) as the original you are replacing. It must also be the exact same size in bytes.
 
 The short version is simply that you need to have at least one FILM file that uses ADX audio for this to work. Adding in ADX audio to a FILM file that didn't already use ADX audio is currently not supported.
 
+NOTES for PCM AUDIO:
+
+Uncompressed PCM Audio is supported in the following file formats:
+
+.PCM File - 8-bit and 16-bit Audio are supported. These files are assumed to be raw headerless files. The default setting assumes they are in Little Endian format. If stereo it assumes they channels are in the standard interleaved format. 
+
+ - If your file is already in Big Endian format you need to check the Big Endian box. 
+ - If your PCM file is one that was extracted from an existing FILM file and is in the raw Saturn Format, then check the Saturn Format box.
+
+.WAV File - Only 16-bit is supported. This is becasue Saturn FILM files use 8-bit SIGNED PCM. The WAV format assumes 8bit is unsigned, so Signed 8-bit is an invalid format. 
+
+NOTE: 
+ - When using WAV or ADX audio, the SaturnFormat and BigEndian checkboxes are ignored as these aren't releavnt to these file formats.
+
 # How to use
 
-1) Encode your new video as you normally would following the Sega Saturn Cinepak Encoding process making sure to adhear to the requirements listed above.
-    * If you want to preserve the original video but replace the audio, encode a copy of the source video with your new audio swapped in. If your original video uses ADX audio, you may also just use an ADX encoded audio file as long as it matches the specifications and length of the original audio data.
+1. If you need to encode a new video, encode it as you normally would following the Sega Saturn Cinepak Encoding process making sure to adhear to the requirements listed above.
+
+    * If you want to preserve the original video but replace the audio and dont want to use a WAV or PCM file, encode a copy of the source video with your new audio swapped in.
     * If you want to preserve the original audio, encode your modified video with uncompressed PCM audio that matches the specifications of the original source video.
-2) Run the tool and select the source FILM or ADX file for your audio, the source FILM file for your video, and the output directory.
-3) Click the "Mux Audio and Video" button.
+
+2. Run the tool and select the source FILM, PCM, WAV or ADX file for your audio, the source FILM file for your video, and the output directory.
+
+4. If using PCM check any special options check boxes if required. (Big Endian, Saturn format, Etc.)
+
+3. Click the "Mux Audio and Video" button.
 
 Your new file will be in the specified output directory with the naming convention "NEW_<Name_of_Source_Audio_File>".
+
+# Audio Extraction
+
+Audio Extraction is a new feature added. Both PCM and ADX audio can be extracted from a source FILM file and can be found under the extract tab.
+
+* If your source uses ADX, the file will be extracted as a .ADX file.
+*  If it uses 8-bit Uncompressed PCM, it will be extracted as a headerless .PCM file ready to be imported into Audacity as RAW Audio.
+*  If it's 16-bit PCM, you can either extract it as a Headerless .PCM file ready to import into Audacity as RAW Audio, or you can export it as a WAV file by checking the WAV Output box.
 
 # Why use this instead of FFMPEG?
 
