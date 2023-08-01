@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -96,6 +97,135 @@ public class FILMUtility {
         }
     }
     
+    public static void extractAudio(FILMfile source, String outputFilePath, boolean waveOut) throws IOException {
+        List<STABEntry> sourceStabs = source.getHeader().getStab().getEntries();
+                        
+        boolean isADX = false;
+        if(source.getHeader().getCompression() == 2) {
+            isADX = true;
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        
+        for(int i = 0; i < sourceStabs.size(); i++) {
+            if(isAudioChunk(sourceStabs.get(i))) {
+                
+                if(!isADX && source.getHeader().getAudioChannels() == 2) {
+                    int length = source.getChunks().get(i).length;
+                    int halfway = source.getChunks().get(i).length / 2;
+                    byte[] leftData = Arrays.copyOfRange(source.getChunks().get(i), 0, halfway);
+                    byte[] rightData = Arrays.copyOfRange(source.getChunks().get(i), halfway, length);
+
+                    int iter = 0;
+                    if(source.getHeader().getAudioResolution() == 16) {
+                        while(iter < leftData.length) {
+                            out.write(leftData[iter]);
+                            out.write(leftData[iter+1]);
+
+                            out.write(rightData[iter]);
+                            out.write(rightData[iter+1]);
+                            
+                            iter+=2;
+                        }   
+                    } else {
+                        if(source.getHeader().getAudioResolution() == 8) {
+                            while(iter < leftData.length) {
+                                out.write(leftData[iter]);
+                                out.write(rightData[iter]);
+                                iter++;
+                            }   
+                        }
+                    }
+                    
+                    
+                } else {
+                    out.write(source.getChunks().get(i));
+                }
+                
+            }
+        }
+        
+        if(!isADX && source.getHeader().getAudioResolution() == 16 && waveOut) {
+            ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
+            
+            byte[] fileBytes = out.toByteArray();
+            ByteBuffer bb = ByteBuffer.allocate(4);
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+            outBuffer.write(new String("RIFF").getBytes());
+            bb.putInt(0, fileBytes.length + 44);
+            outBuffer.write(bb.array());
+            outBuffer.write(new String("WAVE").getBytes());
+            outBuffer.write(new String("fmt ").getBytes());
+            bb.putInt(0, 16);
+            outBuffer.write(bb.array());
+            bb = ByteBuffer.allocate(2);
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+            bb.putShort(0, (short) 1);
+            outBuffer.write(bb.array());
+            bb.putShort(0, (short) source.getHeader().getAudioChannels());
+            outBuffer.write(bb.array());
+            bb = ByteBuffer.allocate(4);
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+            bb.putInt(0, source.getHeader().getSampleRate());
+            outBuffer.write(bb.array());
+            
+            int sampleRate = source.getHeader().getSampleRate();
+            int resolution = source.getHeader().getAudioResolution();
+            int channels = source.getHeader().getAudioChannels();
+            
+            int waveHeaderValue_1 = ((sampleRate * resolution * channels) / 8 );
+            short waveHeaderValue_2 = (short) ((resolution * channels) / 8 );
+            
+            bb.putInt(0, waveHeaderValue_1);
+            outBuffer.write(bb.array());
+            
+
+            bb = ByteBuffer.allocate(2);
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+            bb.putShort(0, waveHeaderValue_2);
+            outBuffer.write(bb.array());
+            bb.putShort(0, (short) resolution);
+            outBuffer.write(bb.array());
+            outBuffer.write(new String("data").getBytes());
+            bb = ByteBuffer.allocate(4);
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+            bb.putInt(0, fileBytes.length);
+            outBuffer.write(bb.array());
+
+            outBuffer.write(swapByteOrder(fileBytes));
+            
+                 
+            out = outBuffer;
+        }
+        
+        String[] pieces = outputFilePath.split("\\.");
+        
+        if(pieces.length > 1) {
+            if(isADX) {
+                pieces[pieces.length - 1] = "ADX";
+            } else if(waveOut && source.header.getAudioResolution() == 16){
+                pieces[pieces.length - 1] = "WAV";
+            } else {
+                pieces[pieces.length - 1] = "PCM";
+            }
+            
+            String outputPath = pieces[0];
+            
+            for (int i = 1; i < pieces.length; i++) {
+                outputPath = outputPath.concat(".").concat(pieces[i]);
+            }
+            
+            outputFilePath = outputPath;
+        }
+        
+        Path path = Paths.get(outputFilePath);
+        try {
+            Files.write(path, out.toByteArray());
+        } catch (IOException e) {
+            log.log(Level.SEVERE, "Caught IOException attempting to write bytes to file.", e);
+            e.printStackTrace();
+        }
+    }
+    
     public static FILMfile swapAudioFromADXFile(String adxFilePath, FILMfile dest) throws IOException {
         
         if(dest.getHeader().getCompression() == 2) {
@@ -130,6 +260,107 @@ public class FILMUtility {
         }
         
     }
+    
+public static FILMfile swapAudioFromWAVFile(String wavFilePath, FILMfile dest) throws IOException {
+    if(dest.getHeader().getCompression() == 0 && dest.header.getAudioResolution() == 16 ) {
+        File f = new File(wavFilePath);
+        byte[] wavBytes = Files.readAllBytes(f.toPath());
+        
+        byte[] PCMBytes = Arrays.copyOfRange(wavBytes, 44, wavBytes.length);
+        
+        return swapPCMData(dest, PCMBytes, false, false);
+        
+    }else {
+        //Can't use 8 bit WAV file, Saturn doesn't support unsigned 8 bit for Cinepak, must but be signed.
+        //WAV can't hold 8-bit signed PCM.
+        return dest;
+    }
+}
+    
+ public static FILMfile swapAudioFromPCMFile(String pcmFilePath, FILMfile dest, boolean satFormat, boolean bigEndian) throws IOException {
+        
+        if(dest.getHeader().getCompression() == 0) {
+            File f = new File(pcmFilePath);
+            
+            byte[] PCMBytes = Files.readAllBytes(f.toPath());
+            
+            return swapPCMData(dest, PCMBytes, satFormat, bigEndian);
+        } else {
+            //file doesn't use PCM, abort.
+            return dest;
+        }
+        
+    }
+ 
+ 
+private static FILMfile swapPCMData(FILMfile dest, byte[] PCMBytes, boolean satFormat, boolean bigEndian) throws IOException {
+    List<STABEntry> destStabs = dest.getHeader().getStab().getEntries();
+    
+    List<Integer> audioStabs = new ArrayList<>();
+    
+    int pcmOffset = 0;
+    List<byte[]> newChunks = new ArrayList<>();
+    for(int i = 0; i < destStabs.size(); i++) {
+        if(isAudioChunk(destStabs.get(i))) {
+            audioStabs.add(i);
+            
+            byte[] rawAudio = Arrays.copyOfRange(PCMBytes, pcmOffset, pcmOffset + destStabs.get(i).getLength());
+            
+            if(!satFormat) {
+                
+                if(dest.header.getAudioResolution() == 16 && !bigEndian) {
+                    rawAudio = swapByteOrder(rawAudio);
+                }
+                
+                if(dest.header.getAudioChannels() == 2) {
+
+                    ByteArrayOutputStream merge = new ByteArrayOutputStream();
+                    ByteArrayOutputStream left = new ByteArrayOutputStream();
+                    ByteArrayOutputStream right = new ByteArrayOutputStream();
+                    
+                    int length = rawAudio.length;
+                    int half = length / 2;
+                    
+                    int iter = 0;
+                    if(dest.header.getAudioResolution() == 16) {
+                        while (iter < length) {
+                            left.write(rawAudio[iter]);  
+                            left.write(rawAudio[iter + 1]); 
+                            
+                            right.write(rawAudio[iter + 2]);  
+                            right.write(rawAudio[iter + 3]);  
+                            iter +=4;
+                        }
+                    } else {
+                        while (iter < length) {
+                            left.write(rawAudio[iter]);
+                            right.write(rawAudio[iter + 1]); 
+                            iter+=2;
+                        }
+                        
+                    }
+                    
+                    merge.write(left.toByteArray());                                            
+                    merge.write(right.toByteArray());
+                    
+                    rawAudio = merge.toByteArray();
+                    
+                }
+            }
+            
+            newChunks.add(rawAudio);
+            
+            pcmOffset += destStabs.get(i).getLength();
+            
+        } else {
+            newChunks.add(dest.getChunks().get(i));
+        }
+    }
+    
+    dest.setChunks(newChunks);
+    
+    return dest;
+}
     
 public static FILMfile swapAudio(FILMfile source, FILMfile dest) throws IOException {
         
@@ -320,4 +551,36 @@ public static FILMfile swapAudio(FILMfile source, FILMfile dest) throws IOExcept
         }
         return new String(hexChars);
     }
+    
+    private static byte[] swapByteOrder(byte[] value) {
+        final int length = value.length;
+        byte[] res = new byte[length];
+        int i = 0;
+        while(i < length) {
+            if(i+1 >= length) {
+                res[i] = value[i];
+            }else {
+                res[i] = value[i+1];
+                res[i+1] = value[i];
+            }
+            
+            i += 2;
+        }
+        return res;
+    }
+    
+    private static byte[] convertSignedToUnsigned(byte[] value) {
+        final int length = value.length;
+        byte[] res = new byte[length];
+        int i = 0;
+        while(i < length) {
+        
+            int val = value[i] & 0x000000FF;
+            res[i] = (byte) val;
+            i++;
+        }
+        
+        return res;
+    }
+    
 }
