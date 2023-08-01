@@ -337,7 +337,7 @@ public class FILMMuxer {
                     extractButton.setEnabled(false);
                     boolean waveOut = chckbxNewCheckBox.isSelected();
                     File f = new File(extractAudioInputFileDirField.getText());
-                    FILMUtility.extractAudio(file1, extractOutputFileDirField.getText() + "\\NEW_" + f.getName(), waveOut);
+                    FILMUtility.extractAudio(file1, extractOutputFileDirField.getText() + "\\" + f.getName(), waveOut);
                     
                     extractButton.setEnabled(true);
                     
