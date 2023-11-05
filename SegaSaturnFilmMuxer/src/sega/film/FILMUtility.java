@@ -255,7 +255,109 @@ public class FILMUtility {
             
             return dest;
         } else {
-            //file doesn't use ADX, abort.
+            File f = new File(adxFilePath);
+            byte[] ADXBytes = Files.readAllBytes(f.toPath());
+ 
+            ByteBuffer adxBB = ByteBuffer.wrap(ADXBytes, 7, 1);
+            byte adxChannels = adxBB.get();
+               
+            adxBB = ByteBuffer.wrap(ADXBytes, 8, 4);
+                
+            int adxSampleRate = adxBB.getInt();
+                
+            int oneHalfSecondOfAudio = adxSampleRate * adxChannels;
+            int oneEighthOfAudio = oneHalfSecondOfAudio / 4;
+            
+            List<STABEntry> destStabs = dest.getHeader().getStab().getEntries();
+            
+            List<Integer> audioStabs = new ArrayList<>();
+            
+            List<Integer> audioStabsToRemove = new ArrayList<>();
+            
+            int adxOffset = 0;
+            List<byte[]> newChunks = new ArrayList<>();
+            boolean isFirstChunk = true;
+            boolean isOddChunk = true;
+            boolean isLastChunk = false;
+            int newOffset = 0;
+            
+            for(int i = 0; i < destStabs.size(); i++) {
+                destStabs.get(i).setOffset(newOffset);
+                if(isAudioChunk(destStabs.get(i))) {
+                    audioStabs.add(i);
+                    
+                    int newLength = 0;
+                    if(isFirstChunk) {
+                        isFirstChunk = false;
+                        
+                        newLength = ((oneHalfSecondOfAudio / 32) * 18) + 0x48;
+                        
+                    } else {
+                    
+                        if(isOddChunk) {
+                            isOddChunk = false;
+                            
+                            newLength = ((oneEighthOfAudio / 32) * 18) - 18;
+                        } else {
+                            isOddChunk = true;
+                            
+                            newLength = ((oneEighthOfAudio / 32) * 18) + 18;
+                        }
+                    }
+                    
+                    if(isLastChunk) {
+                        audioStabsToRemove.add(i);
+                    }
+                    
+                    if(adxOffset + newLength > ADXBytes.length && adxOffset < ADXBytes.length && !isLastChunk) {
+                        newLength = ADXBytes.length - adxOffset;
+                        newOffset += newLength;
+                        destStabs.get(i).setLength(newLength);
+                        newChunks.add(Arrays.copyOfRange(ADXBytes, adxOffset, adxOffset + newLength));
+                        isLastChunk = true;
+                    }
+                    
+                    if(adxOffset > ADXBytes.length) {
+                        isLastChunk = true;
+                    }
+                    
+                    if(!isLastChunk) {
+                        newOffset += newLength;
+                        newChunks.add(Arrays.copyOfRange(ADXBytes, adxOffset, adxOffset + newLength));
+                        
+                        destStabs.get(i).setLength(newLength);
+                        adxOffset += destStabs.get(i).getLength();
+                    }
+                    
+                    
+                    
+                } else {
+                    newOffset += destStabs.get(i).getLength();
+                    newChunks.add(dest.getChunks().get(i));
+                }
+            }
+            
+            if(!audioStabsToRemove.isEmpty()) {
+                List<STABEntry> newStabs = new ArrayList<>();
+                for(int i = 0; i < destStabs.size(); i++) {
+                    if(!audioStabsToRemove.contains(i)) {
+                        newStabs.add(destStabs.get(i));
+                    } else {
+                        System.out.println("Skipping " + i);
+                    }
+                }
+                dest.getHeader().getStab().setEntries(newStabs);
+                dest.getHeader().getStab().setNumOfEntries(newStabs.size());
+                dest.getHeader().getStab().setLength(newStabs.size() * 16);
+                dest.getHeader().setHeaderSize((newStabs.size() * 16 ) + 0x40);
+            }
+            
+            dest.setChunks(newChunks);
+            dest.getHeader().setCompression((byte) 2);
+            dest.getHeader().setAudioChannels(adxChannels);
+            dest.getHeader().setAudioResolution((byte)16);
+            dest.getHeader().setSampleRate((short) adxSampleRate);
+                
             return dest;
         }
         
@@ -509,6 +611,9 @@ public static FILMfile swapAudio(FILMfile source, FILMfile dest) throws IOExcept
         
         bb.putInt(0, stab.getNumOfEntries());
         out.write(bb.array());
+        
+
+        System.out.println("Stabs size: " + stab.getEntries().size());
         
         for(int i = 0; i < stab.getEntries().size(); i++) {
             STABEntry entry = stab.getEntries().get(i);
