@@ -16,8 +16,8 @@ The tool is able to support both uncompressed PCM audio as well as ADX compresse
 Currently the tool does have the following requirements for use:
 1. If using 2 videos as sources, both files video streams must have the exact same amount of frames and match in resolution and frame rate.
 
-2. Both files audio streams must have the same specifications (8-bit/16-bit, Mono/Stereo, Sample Rate, length, etc.). Audio Compression however does not matter.
-
+2. If swapping audio for translation/modification purposes or if using uncompressed audio, both files audio streams should have the same specifications (8-bit/16-bit, Mono/Stereo, Sample Rate, length, etc.). Audio Compression however does not matter.
+  
 3. Being written in Java, a Java Runtime Environment must be installed. It should work with Java 8 or higher.
 
 
@@ -25,9 +25,9 @@ NOTES FOR ADX AUDIO:
 
 Muxing existing ADX audio from a source FILM file with a new video stream from another FILM file is supported and requires he user follow the requirements stated above.
 
-If you are swapping in new ADX audio to mux with an existing Video Stream, you only need to provide the ADX file for the Source Audio file. The one caveat is that the new ADX file must be the exact same specifications (Sample Rate, Stereo/Mono, etc.) as the original you are replacing. It must also be the exact same size in bytes.
+If you are swapping in new ADX audio to mux with an existing Video Stream, you only need to provide the ADX file for the Source Audio file. The one caveat is that the new ADX file must be the exact same specifications (Sample Rate, Stereo/Mono, etc.) as the original you are replacing. It should also be the exact same size in bytes. This is to keep the file as close to the original specifications the game is expecting.
 
-The short version is simply that you need to have at least one FILM file that uses ADX audio for this to work. Adding in ADX audio to a FILM file that didn't already use ADX audio is currently not supported.
+If you are muxing ADX into a file that does not already use ADX audio, the specifications of the ADX audio file will be used. Keep in mind that this may push the video file beyond it's bitrate limit. This feature is also highly experimental as there is no real way to test these files yet beyond injecting them into games that already use ADX Cinepak.
 
 NOTES for PCM AUDIO:
 
