@@ -66,6 +66,32 @@ Audio Extraction is a new feature added. Both PCM and ADX audio can be extracted
 *  If it uses 8-bit Uncompressed PCM, it will be extracted as a headerless .PCM file ready to be imported into Audacity as RAW Audio.
 *  If it's 16-bit PCM, you can either extract it as a Headerless .PCM file ready to import into Audacity as RAW Audio, or you can export it as a WAV file by checking the WAV Output box.
 
+# MovieToSaturn
+
+This feature serves as a replacement for the original Mac OS 7 Application Sega made to convert Quicktime Movie Files to Sega FILM files.
+
+Usage is fairly simple. Simply select your Cinepak video file and click Create FILM file. If successful it will create a .CPK file of the same name in the same directory. Beside the button the stats of the video bitrate will be displayed. Anything above 300KB/s will have playback issues on Saturn. Any spikes could also cause playback issues.
+
+Currently the following video types are supported:
+
+ * Standard Modern Quicktime MOV files. (NOTE: The format has apparently changed and parsing older ones 	from Quicktime 4 or older isn't working correclty at the 	moment with stereo audio.)
+ * Cinepak Codec at 24-bit RGB
+ * 8-bit and 16-bit PCM Audio in both Mono and Stereo not exceeding 44100Hz.
+
+Chroma Key processing is also supported. Simply put the RGB values for the color you want the player to set to the background color. This currently isn't tested but should work as far as the file encoding goes.
+
+Quicktime MOV files can be encoded and created with either FFMPEG or VirtualDub 2:
+ * Select Cinepak as the video compression codec.
+ * Set the bitrate to be below 300KB/s (Don't forget to factor in your audio bitrate!)
+ * Adjust the framerate to the desired frame rate.
+ * Set the output colordepth to 24-bit RGB
+ * Set the Audio to 8-bit or 16-bit PCM
+ * Samplerate cannot exceed 44100Hz
+ * Channels can only be Mono or Stereo.
+ * Save as .MOV file (not fast start!)
+   
+This is still a work in progress. Every possibly video frame rate, audio rate, etc. has not been tested so there may still be issues. 
+
 # Why use this instead of FFMPEG?
 
 While FFMPEG does technically support Sega FILM files, it does not generate the STAB chunk correctly. While some games may be lenient and still play these files, thay may present issues (Video glitches, Cracks and Pops in audio, other errors, etc.). Other games may instead just flat out refuse to play these files or crash completely. A good example of this is Sakura Wars 2. When doing research on various different ADX Cinepak files, this was a game I found that flat out would not play any file I threw at it that used ADX audio that FFMPEG created.
