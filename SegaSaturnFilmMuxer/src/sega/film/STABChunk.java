@@ -93,6 +93,10 @@ public class STABChunk {
         this.entries = entries;
     }
     
+    public void addEntry(STABEntry entry ) {
+        this.entries.add(entry);
+    }
+    
     
 
 }

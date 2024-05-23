@@ -11,16 +11,23 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.text.NumberFormat;
+
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.text.NumberFormatter;
 
+import sega.cvid.MovieToSaturn;
 import sega.film.FILMUtility;
 import sega.film.FILMfile;
+
 import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
 import javax.swing.JCheckBox;
@@ -28,6 +35,7 @@ import javax.swing.JCheckBox;
 public class FILMMuxer {
 
     private JFrame frame;
+    private String message = "";
     
     /**
      * Launch the application.
@@ -351,11 +359,162 @@ public class FILMMuxer {
         extractButton.setBounds(10, 204, 514, 57);
         panel2.add(extractButton);
         
+        
+        JPanel panel3 = new JPanel(false);
+        JLabel filler3 = new JLabel("MovieToSaturn");
+        filler3.setHorizontalAlignment(JLabel.CENTER);
+        filler3.setFont(new Font("Arial", Font.PLAIN, 11));
+        panel3.setLayout(null);
+        panel3.add(filler3);
+        panel3.setPreferredSize(new Dimension(550, 225));
+        
+        
+        TextField sourceVideoFileDirField = new TextField();
+        sourceVideoFileDirField.setBounds(157, 41, 343, 22);
+        panel3.add(sourceVideoFileDirField);
+        
+        Button sourceVideoFileDirSearchButton = new Button("...");
+        sourceVideoFileDirSearchButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                chooser.setFileFilter(new FileFilter() {
+
+                    public String getDescription() {
+                        return "Cinepak Video File (*.mov)";
+                    }
+
+                    public boolean accept(File f) {
+                        if (f.isDirectory()) {
+                            return true;
+                        } else {
+                            String filename = f.getName().toLowerCase();
+                            return filename.endsWith(".mov") ;
+                        }
+                    }
+                });
+                int returnVal = chooser.showOpenDialog(null);
+                if(returnVal == JFileChooser.APPROVE_OPTION) {
+                   System.out.println("You chose to open this file: " +
+                        chooser.getSelectedFile().getName());
+                   sourceVideoFileDirField.setText(chooser.getSelectedFile().getAbsolutePath());
+                }
+            }
+        });
+        sourceVideoFileDirSearchButton.setBounds(502, 41, 22, 22);
+        panel3.add(sourceVideoFileDirSearchButton);
+        
+        Label sourceVideoFileDirLabel = new Label("Source Video File: ");
+        sourceVideoFileDirLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        sourceVideoFileDirLabel.setBounds(10, 41, 148, 22);
+        panel3.add(sourceVideoFileDirLabel);
+
+        
+        Label movieToSaturnTitle = new Label("MovieToSaturn");
+        movieToSaturnTitle.setFont(new Font("Arial", Font.BOLD, 14));
+        movieToSaturnTitle.setBounds(10, 13, 249, 22);
+        panel3.add(movieToSaturnTitle);
+        
+        Label chromaKeyConstraints = new Label("(Enter values per channel between 0-255)");
+        chromaKeyConstraints.setFont(new Font("Arial", Font.PLAIN, 11));
+        chromaKeyConstraints.setBounds(275, 100, 225, 22);
+        panel3.add(chromaKeyConstraints);
+        
+        JCheckBox enableChromaKeyCheckbox = new JCheckBox("Enable Chroma Key Processing");
+        enableChromaKeyCheckbox.setBounds(10, 76, 256, 23);
+        panel3.add(enableChromaKeyCheckbox);
+        
+        NumberFormat format = NumberFormat.getInstance();
+        NumberFormatter formatter = new NumberFormatter(format);
+        formatter.setValueClass(Integer.class);
+        formatter.setMinimum(0);
+        formatter.setMaximum(255);
+        formatter.setAllowsInvalid(false);
+        // If you want the value to be committed on each keystroke instead of focus lost
+        formatter.setCommitsOnValidEdit(true);
+        
+        Label redLabel = new Label("Red: ");
+        redLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        redLabel.setBounds(10, 100, 35, 22);
+        panel3.add(redLabel);
+        
+        JFormattedTextField redField = new JFormattedTextField(formatter);
+        redField.setBounds(50, 100, 40, 22);
+        panel3.add(redField);
+        
+        Label greenLabel = new Label("Green: ");
+        greenLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        greenLabel.setBounds(95, 100, 50, 22);
+        panel3.add(greenLabel);
+        
+        JFormattedTextField greenField = new JFormattedTextField(formatter);
+        greenField.setBounds(145, 100, 40, 22);
+        panel3.add(greenField);
+        
+        Label blueLabel = new Label("Blue: ");
+        blueLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        blueLabel.setBounds(190, 100, 35, 22);
+        panel3.add(blueLabel);
+        
+        JFormattedTextField blueField = new JFormattedTextField(formatter);
+        blueField.setBounds(225, 100, 40, 22);
+        panel3.add(blueField);
+        
+        
+        JLabel MessageLabel = new JLabel(message);
+       
+        MessageLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        MessageLabel.setBounds(10, 140, 344, 100);
+        panel3.add(MessageLabel);
+        
+        Button createButton = new Button("Create FILM File");
+        createButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                
+                try {
+
+                    System.out.println("Attempting to create film file...");
+                    createButton.setEnabled(false);
+                    boolean enableChromaKey = enableChromaKeyCheckbox.isSelected();
+                    File f = new File(sourceVideoFileDirField.getText());
+                    byte red = 0;
+                    byte green = 0;
+                    byte blue = 0;
+                    
+                    if(!redField.getText().isEmpty()) {
+                        red = Integer.valueOf(redField.getText()).byteValue();
+                    }
+                    if(!greenField.getText().isEmpty()) {
+                        green = Integer.valueOf(greenField.getText()).byteValue();
+                    }
+                    if(!blueField.getText().isEmpty()) {
+                        blue = Integer.valueOf(blueField.getText()).byteValue();
+                    }
+                    
+                    MovieToSaturn.movieToSaturn(f, enableChromaKey, red, blue, green);
+                    MessageLabel.setText(MovieToSaturn.getStatsMessage());                    
+                    createButton.setEnabled(true);
+                    
+                } catch (Exception e1) {
+                    MessageLabel.setText(e1.getMessage());
+                    createButton.setEnabled(true);
+                }
+
+            }
+        });
+        createButton.setFont(new Font("Arial", Font.PLAIN, 20));
+        createButton.setBounds(355, 204, 164, 57);
+        panel3.add(createButton);
+
+        
+        
        // tabbedPane.setEnabledAt(1, true);
         tabbedPane.addTab("Muxer", panel1);
         
         
         tabbedPane.addTab("Extractor", panel2);
+        
+        tabbedPane.addTab("MovieToSaturn", panel3);
         
         
         frame.getContentPane().add(tabbedPane);

@@ -52,6 +52,24 @@ public class FILMUtility {
             bb = ByteBuffer.wrap(FILMBytes, 40, 2);
             file.getHeader().setSampleRate(bb.getShort());
             
+            bb = ByteBuffer.wrap(FILMBytes, 42, 2);
+            file.getHeader().setUnknown(bb.getShort());
+            
+            bb = ByteBuffer.wrap(FILMBytes, 44, 1);
+            file.getHeader().setChromaKeyEnable(bb.get());
+            
+            bb = ByteBuffer.wrap(FILMBytes, 45, 1);
+            file.getHeader().setChromaKeyBlue(bb.get());
+            
+            bb = ByteBuffer.wrap(FILMBytes, 46, 1);
+            file.getHeader().setChromaKeyBlue(bb.get());
+            
+            bb = ByteBuffer.wrap(FILMBytes, 47, 1);
+            file.getHeader().setChromaKeyGreen(bb.get());
+            
+            bb = ByteBuffer.wrap(FILMBytes, 48, 1);
+            file.getHeader().setChromaKeyRed(bb.get());
+            
             bb = ByteBuffer.wrap(FILMBytes, 52, 4);
             file.getHeader().getStab().setLength(bb.getInt());
             
@@ -596,8 +614,23 @@ public static FILMfile swapAudio(FILMfile source, FILMfile dest) throws IOExcept
         bb.putShort(0, header.getSampleRate());
         out.write(bb.array());
         
-        out.write(new byte[6]);
+        bb.putShort(0, header.getUnknown());
+        out.write(bb.array());
         
+        bb = ByteBuffer.allocate(1);
+        
+        bb.put(0, header.getChromaKeyEnable());
+        out.write(bb.array());
+
+        bb.put(0, header.getChromaKeyBlue());
+        out.write(bb.array());
+
+        bb.put(0, header.getChromaKeyGreen());
+        out.write(bb.array());
+
+        bb.put(0, header.getChromaKeyRed());
+        out.write(bb.array());
+                
         STABChunk stab = header.getStab();
         
         out.write(stab.getStabString().getBytes());

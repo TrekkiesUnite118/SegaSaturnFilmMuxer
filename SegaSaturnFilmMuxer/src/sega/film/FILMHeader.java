@@ -15,6 +15,11 @@ public class FILMHeader {
     private byte audioResolution;
     private byte compression;
     private short sampleRate;
+    private short unknown;
+    private byte chromaKeyEnable;
+    private byte chromaKeyBlue;
+    private byte chromaKeyGreen;
+    private byte chromaKeyRed;
     private STABChunk stab = new STABChunk();
     
     /**
@@ -226,6 +231,86 @@ public class FILMHeader {
         this.sampleRate = sampleRate;
     }
     /**
+     * The getter for unknown.
+     *
+     * @return the unknown.
+     */
+    public short getUnknown() {
+        return unknown;
+    }
+    /**
+     * The setter for unknown.
+     *
+     * @param unknown the unknown to set.
+     */
+    public void setUnknown(short unknown) {
+        this.unknown = unknown;
+    }
+    /**
+     * The getter for chromaKeyEnable.
+     *
+     * @return the chromaKeyEnable.
+     */
+    public byte getChromaKeyEnable() {
+        return chromaKeyEnable;
+    }
+    /**
+     * The setter for chromaKeyEnable.
+     *
+     * @param chromaKeyEnable the chromaKeyEnable to set.
+     */
+    public void setChromaKeyEnable(byte chromaKeyEnable) {
+        this.chromaKeyEnable = chromaKeyEnable;
+    }
+    /**
+     * The getter for chromaKeyBlue.
+     *
+     * @return the chromaKeyBlue.
+     */
+    public byte getChromaKeyBlue() {
+        return chromaKeyBlue;
+    }
+    /**
+     * The setter for chromaKeyBlue.
+     *
+     * @param chromaKeyBlue the chromaKeyBlue to set.
+     */
+    public void setChromaKeyBlue(byte chromaKeyBlue) {
+        this.chromaKeyBlue = chromaKeyBlue;
+    }
+    /**
+     * The getter for chromaKeyGreen.
+     *
+     * @return the chromaKeyGreen.
+     */
+    public byte getChromaKeyGreen() {
+        return chromaKeyGreen;
+    }
+    /**
+     * The setter for chromaKeyGreen.
+     *
+     * @param chromaKeyGreen the chromaKeyGreen to set.
+     */
+    public void setChromaKeyGreen(byte chromaKeyGreen) {
+        this.chromaKeyGreen = chromaKeyGreen;
+    }
+    /**
+     * The getter for chromaKeyRed.
+     *
+     * @return the chromaKeyRed.
+     */
+    public byte getChromaKeyRed() {
+        return chromaKeyRed;
+    }
+    /**
+     * The setter for chromaKeyRed.
+     *
+     * @param chromaKeyRed the chromaKeyRed to set.
+     */
+    public void setChromaKeyRed(byte chromaKeyRed) {
+        this.chromaKeyRed = chromaKeyRed;
+    }
+    /**
      * The getter for stab.
      *
      * @return the stab.
@@ -242,6 +327,21 @@ public class FILMHeader {
         this.stab = stab;
     }
     
-    
+    public void printHeader() {
+        System.out.println(filmString);
+        System.out.println(headerSize);
+        System.out.println(version);
+        System.out.println(fsdcString);
+        System.out.println(fsdcLength);
+        System.out.println(fourCC);
+        System.out.println(height);
+        System.out.println(width);
+        System.out.println(bpp);
+        System.out.println(audioChannels);
+        System.out.println(audioResolution);
+        System.out.println(compression);
+        System.out.println(sampleRate & 0xffff);
+    }
+
 
 }
